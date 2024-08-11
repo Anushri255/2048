@@ -17,6 +17,7 @@
         }
 
         .game-container {
+            position: relative;
             text-align: center;
         }
 
@@ -61,15 +62,31 @@
             background-color: #f2b179;
             color: #f9f6f2;
         }
+
+        .game-over-banner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(238, 228, 218, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 36px;
+            color: #776e65;
+            display: none;
+        }
     </style>
 </head>
 
 <body>
     <div class="game-container">
         <div class="score-container">
-            <div>Score: <span id="score">0</span></div>
+            <div>Moves: <span id="score">0</span></div>
         </div>
         <div class="grid-container" id="grid-container">
+        </div>
+        <div class="game-over-banner" id="game-over-banner">
+            Game Over
         </div>
     </div>
 </body>
@@ -77,6 +94,7 @@
     document.addEventListener('DOMContentLoaded', () => {
         const gridContainer = document.getElementById('grid-container');
         const scoreDisplay = document.getElementById('score');
+        const gameOverBanner = document.getElementById('game-over-banner');
         let grid = [];
         let score = 0;
 
@@ -113,59 +131,88 @@
             }
         }
 
+        // Move tiles in the given direction
         function moveTiles(direction) {
-    let moved = false;
-    const mergeOrder = direction === 'up' || direction === 'down' ? [[0, 4, 8, 12], [1, 5, 9, 13], [2, 6, 10, 14], [3, 7, 11, 15]] : [[0, 1, 2, 3], [4, 5, 6, 7], [8, 9, 10, 11], [12, 13, 14, 15]];
+            let moved = false;
+            const mergeOrder = direction === 'up' || direction === 'down' ? [[0, 4, 8, 12], [1, 5, 9, 13], [2, 6, 10, 14], [3, 7, 11, 15]] : [[0, 1, 2, 3], [4, 5, 6, 7], [8, 9, 10, 11], [12, 13, 14, 15]];
 
-    mergeOrder.forEach(group => {
-        let values = group.map(index => parseInt(grid[index].dataset.value));
-        if (direction === 'right' || direction === 'down') {
-            values.reverse();
-        }
+            mergeOrder.forEach(group => {
+                let values = group.map(index => parseInt(grid[index].dataset.value));
+                if (direction === 'right' || direction === 'down') {
+                    values.reverse();
+                }
 
-        let filteredValues = values.filter(value => value > 0);
+                let filteredValues = values.filter(value => value > 0);
 
-        // Merge adjacent tiles of the same value
-        for (let i = 0; i < filteredValues.length - 1; i++) {
-            if (filteredValues[i] === filteredValues[i + 1]) {
-                filteredValues[i] *= 2;
-                score += filteredValues[i];
-                filteredValues[i + 1] = 0;
-                moved = true;
+                // Merge adjacent tiles of the same value
+                for (let i = 0; i < filteredValues.length - 1; i++) {
+                    if (filteredValues[i] === filteredValues[i + 1]) {
+                        filteredValues[i] *= 2;
+                        score += filteredValues[i];
+                        filteredValues[i + 1] = 0;
+                        moved = true;
+                    }
+                }
+
+                filteredValues = filteredValues.filter(value => value > 0);
+
+                // Fill the remaining spaces with zeros
+                while (filteredValues.length < 4) {
+                    filteredValues.push(0);
+                }
+
+                if (direction === 'right' || direction === 'down') {
+                    filteredValues.reverse();
+                }
+
+                // Update the grid and cell displays
+                group.forEach((index, i) => {
+                    if (grid[index].dataset.value !== filteredValues[i].toString()) {
+                        moved = true;
+                    }
+                    grid[index].dataset.value = filteredValues[i];
+                    updateCell(grid[index]);
+                });
+            });
+
+            if (moved) {
+                addRandomTile();
+                if (checkGameOver()) {
+                    displayGameOver();
+                }
             }
+
+            scoreDisplay.textContent = score;
         }
 
-        filteredValues = filteredValues.filter(value => value > 0);
-
-        // Fill the remaining spaces with zeros
-        while (filteredValues.length < 4) {
-            filteredValues.push(0);
-        }
-
-        if (direction === 'right' || direction === 'down') {
-            filteredValues.reverse();
-        }
-
-        // Update the grid and cell displays
-        group.forEach((index, i) => {
-            if (grid[index].dataset.value !== filteredValues[i].toString()) {
-                moved = true;
+        // Check if there are any possible moves
+        function checkGameOver() {
+            // Check if there are any empty cells
+            const emptyCells = grid.filter(cell => cell.dataset.value === '0');
+            if (emptyCells.length > 0) {
+                return false;
             }
-            grid[index].dataset.value = filteredValues[i];
-            updateCell(grid[index]);
-        });
-    });
 
-    if (moved) {
-        addRandomTile();
-    }
+            // Check if there are any possible merges
+            for (let i = 0; i < grid.length; i++) {
+                const value = parseInt(grid[i].dataset.value);
+                // Check right and down
+                if ((i % 4 !== 3 && parseInt(grid[i + 1].dataset.value) === value) || (i < 12 && parseInt(grid[i + 4].dataset.value) === value)) {
+                    return false;
+                }
+            }
 
-    scoreDisplay.textContent = score;
-}
+            return true;
+        }
 
+        // Display the game over banner
+        function displayGameOver() {
+            gameOverBanner.style.display = 'block';
+            document.removeEventListener('keydown', handleKeyPress);
+        }
 
         // Handle keypresses
-        document.addEventListener('keydown', (event) => {
+        function handleKeyPress(event) {
             if (event.key === 'ArrowUp') {
                 moveTiles('up');
             } else if (event.key === 'ArrowDown') {
@@ -175,13 +222,12 @@
             } else if (event.key === 'ArrowRight') {
                 moveTiles('right');
             }
-        });
+        }
+
+        document.addEventListener('keydown', handleKeyPress);
 
         initGrid();
-
-
     });
-
 </script>
 
 </html>
