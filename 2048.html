@@ -1,1 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
 
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2048 Game</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #faf8ef;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .game-container {
+            text-align: center;
+        }
+
+        .score-container {
+            margin-bottom: 20px;
+            font-size: 24px;
+            color: #776e65;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(4, 100px);
+            grid-template-rows: repeat(4, 100px);
+            gap: 10px;
+            background-color: #bbada0;
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        .grid-cell {
+            width: 100px;
+            height: 100px;
+            background-color: #cdc1b4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #776e65;
+            border-radius: 10px;
+        }
+
+        .grid-cell[data-value="2"] {
+            background-color: #eee4da;
+        }
+
+        .grid-cell[data-value="4"] {
+            background-color: #ede0c8;
+        }
+
+        .grid-cell[data-value="8"] {
+            background-color: #f2b179;
+            color: #f9f6f2;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="game-container">
+        <div class="score-container">
+            <div>Score: <span id="score">0</span></div>
+        </div>
+        <div class="grid-container" id="grid-container">
+        </div>
+    </div>
+</body>
+
+</html>
