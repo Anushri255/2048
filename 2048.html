@@ -155,6 +155,19 @@
             scoreDisplay.textContent = score;
         }
 
+        // Handle keypresses
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'ArrowUp') {
+                moveTiles('up');
+            } else if (event.key === 'ArrowDown') {
+                moveTiles('down');
+            } else if (event.key === 'ArrowLeft') {
+                moveTiles('left');
+            } else if (event.key === 'ArrowRight') {
+                moveTiles('right');
+            }
+        });
+
         initGrid();
 
 
