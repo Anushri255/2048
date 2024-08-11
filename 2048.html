@@ -132,10 +132,29 @@
                         moved = true;
                     }
                 }
+
+                values = values.filter(value => value > 0);
+                while (values.length < 4) {
+                    values.push(0);
+                }
+
+                if (direction === 'right' || direction === 'down') {
+                    values.reverse();
+                }
+
+                group.forEach((index, i) => {
+                    grid[index].dataset.value = values[i];
+                    updateCell(grid[index]);
+                });
+            });
+
+            if (moved) {
+                addRandomTile();
             }
 
+            scoreDisplay.textContent = score;
         }
-    
+
         initGrid();
 
 
