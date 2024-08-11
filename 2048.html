@@ -113,47 +113,56 @@
             }
         }
 
-        // Move tiles in the given direction
         function moveTiles(direction) {
-            let moved = false;
-            const mergeOrder = direction === 'up' || direction === 'down' ? [[0, 4, 8, 12], [1, 5, 9, 13], [2, 6, 10, 14], [3, 7, 11, 15]] : [[0, 1, 2, 3], [4, 5, 6, 7], [8, 9, 10, 11], [12, 13, 14, 15]];
+    let moved = false;
+    const mergeOrder = direction === 'up' || direction === 'down' ? [[0, 4, 8, 12], [1, 5, 9, 13], [2, 6, 10, 14], [3, 7, 11, 15]] : [[0, 1, 2, 3], [4, 5, 6, 7], [8, 9, 10, 11], [12, 13, 14, 15]];
 
-            mergeOrder.forEach(group => {
-                let values = group.map(index => parseInt(grid[index].dataset.value));
-                if (direction === 'right' || direction === 'down') {
-                    values.reverse();
-                }
-
-                for (let i = 0; i < 3; i++) {
-                    if (values[i] > 0 && values[i] === values[i + 1]) {
-                        values[i] *= 2;
-                        score += values[i];
-                        values[i + 1] = 0;
-                        moved = true;
-                    }
-                }
-
-                values = values.filter(value => value > 0);
-                while (values.length < 4) {
-                    values.push(0);
-                }
-
-                if (direction === 'right' || direction === 'down') {
-                    values.reverse();
-                }
-
-                group.forEach((index, i) => {
-                    grid[index].dataset.value = values[i];
-                    updateCell(grid[index]);
-                });
-            });
-
-            if (moved) {
-                addRandomTile();
-            }
-
-            scoreDisplay.textContent = score;
+    mergeOrder.forEach(group => {
+        let values = group.map(index => parseInt(grid[index].dataset.value));
+        if (direction === 'right' || direction === 'down') {
+            values.reverse();
         }
+
+        let filteredValues = values.filter(value => value > 0);
+
+        // Merge adjacent tiles of the same value
+        for (let i = 0; i < filteredValues.length - 1; i++) {
+            if (filteredValues[i] === filteredValues[i + 1]) {
+                filteredValues[i] *= 2;
+                score += filteredValues[i];
+                filteredValues[i + 1] = 0;
+                moved = true;
+            }
+        }
+
+        filteredValues = filteredValues.filter(value => value > 0);
+
+        // Fill the remaining spaces with zeros
+        while (filteredValues.length < 4) {
+            filteredValues.push(0);
+        }
+
+        if (direction === 'right' || direction === 'down') {
+            filteredValues.reverse();
+        }
+
+        // Update the grid and cell displays
+        group.forEach((index, i) => {
+            if (grid[index].dataset.value !== filteredValues[i].toString()) {
+                moved = true;
+            }
+            grid[index].dataset.value = filteredValues[i];
+            updateCell(grid[index]);
+        });
+    });
+
+    if (moved) {
+        addRandomTile();
+    }
+
+    scoreDisplay.textContent = score;
+}
+
 
         // Handle keypresses
         document.addEventListener('keydown', (event) => {
