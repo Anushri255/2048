@@ -75,43 +75,72 @@
 </body>
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-    const gridContainer = document.getElementById('grid-container');
-    const scoreDisplay = document.getElementById('score');
-    let grid = [];
-    let score = 0;
+        const gridContainer = document.getElementById('grid-container');
+        const scoreDisplay = document.getElementById('score');
+        let grid = [];
+        let score = 0;
 
-    // Initialise the grid
-    function initGrid() {
-        for (let i = 0; i < 16; i++) {
-            const cell = document.createElement('div');
-            cell.classList.add('grid-cell');
-            cell.setAttribute('data-value', '0');
-            gridContainer.appendChild(cell);
-            grid.push(cell);
+        // Initialize the grid
+        function initGrid() {
+            for (let i = 0; i < 16; i++) {
+                const cell = document.createElement('div');
+                cell.classList.add('grid-cell');
+                cell.setAttribute('data-value', '0');
+                gridContainer.appendChild(cell);
+                grid.push(cell);
+            }
+            addRandomTile();
+            addRandomTile();
         }
-        addRandomTile();
-        addRandomTile();
-    }
 
-    // Add a random block (2 or 4)
-    function addRandomTile() {
-        const emptyCells = grid.filter(cell => cell.dataset.value === '0');
-        if (emptyCells.length > 0) {
-            const randomCell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
-            randomCell.dataset.value = Math.random() < 0.9 ? '2' : '4';
-            updateCell(randomCell);
+        // Add a random tile (2 or 4)
+        function addRandomTile() {
+            const emptyCells = grid.filter(cell => cell.dataset.value === '0');
+            if (emptyCells.length > 0) {
+                const randomCell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+                randomCell.dataset.value = Math.random() < 0.9 ? '2' : '4';
+                updateCell(randomCell);
+            }
         }
-    }
 
-    // Update cell display
-    function updateCell(cell) {
-        const value = cell.dataset.value;
-        cell.textContent = value > 0 ? value : '';
-        cell.className = 'grid-cell';
-        if (value > 0) {
-            cell.classList.add(`value-${value}`);
+        // Update cell display
+        function updateCell(cell) {
+            const value = cell.dataset.value;
+            cell.textContent = value > 0 ? value : '';
+            cell.className = 'grid-cell';
+            if (value > 0) {
+                cell.classList.add(`value-${value}`);
+            }
         }
-    }
+
+        // Move tiles in the given direction
+        function moveTiles(direction) {
+            let moved = false;
+            const mergeOrder = direction === 'up' || direction === 'down' ? [[0, 4, 8, 12], [1, 5, 9, 13], [2, 6, 10, 14], [3, 7, 11, 15]] : [[0, 1, 2, 3], [4, 5, 6, 7], [8, 9, 10, 11], [12, 13, 14, 15]];
+
+            mergeOrder.forEach(group => {
+                let values = group.map(index => parseInt(grid[index].dataset.value));
+                if (direction === 'right' || direction === 'down') {
+                    values.reverse();
+                }
+
+                for (let i = 0; i < 3; i++) {
+                    if (values[i] > 0 && values[i] === values[i + 1]) {
+                        values[i] *= 2;
+                        score += values[i];
+                        values[i + 1] = 0;
+                        moved = true;
+                    }
+                }
+            }
+
+        }
+    
+        initGrid();
+
+
+    });
+
 </script>
 
 </html>
